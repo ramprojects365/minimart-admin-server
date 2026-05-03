@@ -1,5 +1,5 @@
 import { RequestHandler } from "express-serve-static-core";
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 import { responseLogger } from "../../../general/responseLogs";
 import { ApiError, PublicInfo } from "../../../../../model/shared/messages";

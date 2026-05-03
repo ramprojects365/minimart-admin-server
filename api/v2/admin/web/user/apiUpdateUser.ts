@@ -1,5 +1,5 @@
 import { RequestHandler } from "express-serve-static-core";
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 import { responseLogger } from "../../../general/responseLogs";
 import { UserUpdateFilters } from "../../../../../model/adminuser/adminUserFilters";
@@ -14,6 +14,11 @@ export const apiUpdateUser: RequestHandler = async (req, res, next) => {
     const userID = req.params.id;
     const password = req.body.password || "";
     bcrypt.hash(password, saltRounds, async (err, hash) => {
+        if (err || !hash) {
+            responseLogger.print("Error hashing password...", req, res);
+            res.status(500).json(ApiError.errServerError({ error: "Error updating user" }).publicVersion());
+            return;
+        }
         const filters = new UserUpdateFilters(req.body, req.body.password, hash);
         var sqlQuery = "UPDATE adminusers SET " + filters.getCondition() + " WHERE id = ?";
         var queryData = [userID];
