@@ -9,6 +9,7 @@ declare module "mysql2/promise" {
   export interface Pool {
     query(sql: string | QueryOptions, values?: any[] | ((err: Error, results?: any, fields?: any) => void)): Promise<[any, any]>;
     query(sql: string | QueryOptions, values: any[], callback: (err: Error, results?: any, fields?: any) => void): void;
+    execute(sql: string | QueryOptions, values?: any[] | { [param: string]: any }): Promise<[any, any]>;
     getConnection(): Promise<PoolConnection>;
     releaseConnection(connection: any): void;
     end(callback?: (err?: Error) => void): Promise<void>;

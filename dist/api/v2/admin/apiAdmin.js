@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const apiWeb_1 = require("./web/apiWeb");
+const reports_1 = require("./reports/reports");
+const apiExternal_1 = require("./externalapis/apiExternal");
+exports.adminRouter = express_1.Router();
+exports.adminRouter.use("/web", apiWeb_1.adminWebRouter);
+exports.adminRouter.use("/reports", reports_1.reportsRouter);
+exports.adminRouter.use("/external", apiExternal_1.externalRouter);

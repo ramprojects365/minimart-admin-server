@@ -2,7 +2,7 @@
 node_modules
 
 # production
-dist
+
 tmp/
 out-tsc/
 

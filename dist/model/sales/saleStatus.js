@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class SaleStatus {
+    constructor(data) {
+        this.status_id = data.status_id;
+        this.sales_id = data.sales_id;
+        this.status = data.status;
+        this.updated_by = data.updated_by;
+        this.date = data.date;
+    }
+    ;
+}
+exports.SaleStatus = SaleStatus;
