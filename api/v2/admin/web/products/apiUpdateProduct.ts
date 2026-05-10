@@ -1,5 +1,4 @@
 import { RequestHandler } from "express";
-import * as fs from "fs";
 
 import { responseLogger } from "../../../general/responseLogs";
 import { executeQuery } from "../../../../../db/db";
@@ -7,6 +6,7 @@ import { PublicInfo, ApiError } from "../../../../../model/shared/messages";
 import * as dbModel from "../../../../../db/model_created";
 import { ProductUpdateFilters } from "../../../../../model/product/productFilters";
 import { ProductSummary } from "../../../../../model/product/productSummary";
+import { moveImageFromCache } from "../../../general/static";
 
 export const ApiUpdateProduct: RequestHandler = async (req, res, next) => {
     responseLogger.print("Calling Update Product...", req, res);
@@ -36,17 +36,8 @@ export const ApiUpdateProduct: RequestHandler = async (req, res, next) => {
         }
     } else {
         req.body.image = image;
-        fs.copyFile('public/cache/' + image, 'public/product_images/' + image, async (err) => {
-            if (err) {
-                return next(ApiError.errCopyImageFailed({ "details": "Image copy failed" }));
-            }
-            fs.unlink('public/cache/' + image, (err) => {
-                if (err) {
-                    responseLogger.print("Image Delete from cache failed...", req, res);
-                    return
-                }
-                responseLogger.print("Image Delete from cache sucess...", req, res);
-            });
+        try {
+            await moveImageFromCache(image, "product_images");
             responseLogger.print('Image was moved.........', req, res);
             const filters = new ProductUpdateFilters(req.body);
             var sqlQuery = "UPDATE products SET " + filters.getCondition() + " WHERE product_id = ?";
@@ -67,6 +58,8 @@ export const ApiUpdateProduct: RequestHandler = async (req, res, next) => {
                 responseLogger.print("Error Update Product...", req, res);
                 return next(ApiError.errInDatabase(error));
             }
-        });
+        } catch (error) {
+            return next(ApiError.errCopyImageFailed({ "details": "Image copy failed", error }));
+        }
     }
 }

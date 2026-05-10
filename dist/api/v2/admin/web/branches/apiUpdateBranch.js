@@ -1,13 +1,5 @@
 "use strict";
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs = __importStar(require("fs"));
 const db_1 = require("../../../../../db/db");
 const responseLogs_1 = require("../../../general/responseLogs");
 const messages_1 = require("../../../../../model/shared/messages");
@@ -51,17 +43,8 @@ exports.ApiUpdateBranch = async (req, res, next) => {
     else {
         //Image changed
         req.body.image = image;
-        fs.copyFile('public/cache/' + image, 'public/shop_images/' + image, async (err) => {
-            if (err) {
-                return next(messages_1.ApiError.errCopyImageFailed({ "details": "Image copy failed" }));
-            }
-            fs.unlink('public/cache/' + image, (err) => {
-                if (err) {
-                    responseLogs_1.responseLogger.print("Image Delete from cache failed...", req, res);
-                    return;
-                }
-                responseLogs_1.responseLogger.print("Image Delete from cache sucess...", req, res);
-            });
+        try {
+            await static_1.moveImageFromCache(image, "shop_images");
             responseLogs_1.responseLogger.print('Image was moved.........', req, res);
             const filters = new branchFilters_1.BranchUpdateFilters(req.body);
             var sqlQuery = "UPDATE branches SET " + filters.getCondition() + " WHERE branch_id = ?";
@@ -86,6 +69,9 @@ exports.ApiUpdateBranch = async (req, res, next) => {
                 responseLogs_1.responseLogger.print("Error Update Branch...", req, res);
                 return next(messages_1.ApiError.errInDatabase(error));
             }
-        });
+        }
+        catch (error) {
+            return next(messages_1.ApiError.errCopyImageFailed({ "details": "Image copy failed", error }));
+        }
     }
 };

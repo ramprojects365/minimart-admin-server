@@ -1,17 +1,10 @@
 "use strict";
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs = __importStar(require("fs"));
 const responseLogs_1 = require("../../../general/responseLogs");
 const messages_1 = require("../../../../../model/shared/messages");
 const db_1 = require("../../../../../db/db");
 const productSummary_1 = require("../../../../../model/product/productSummary");
+const static_1 = require("../../../general/static");
 exports.ApiCreateProduct = async (req, res, next) => {
     responseLogs_1.responseLogger.print("Calling Create Product...", req, res);
     const requiredFields = ["category_id", "company", "name", "image"];
@@ -31,17 +24,8 @@ exports.ApiCreateProduct = async (req, res, next) => {
         weight: req.body.weight || 0.00,
         sku: req.body.sku || null,
     };
-    fs.copyFile('public/cache/' + image, 'public/product_images/' + image, async (err) => {
-        if (err) {
-            return next(messages_1.ApiError.errCopyImageFailed({ "details": "Image copy failed" }));
-        }
-        fs.unlink('public/cache/' + image, (err) => {
-            if (err) {
-                responseLogs_1.responseLogger.print("Image Delete from cache failed...", req, res);
-                return;
-            }
-            responseLogs_1.responseLogger.print("Image Delete from cache sucess...", req, res);
-        });
+    try {
+        await static_1.moveImageFromCache(image, "product_images");
         responseLogs_1.responseLogger.print('Image was moved.........', req, res);
         var sqlQuery = "INSERT INTO products (category_id, company, name, image, description, weight, sku) VALUES (?, ?, ?, ?, ?, ?, ?)";
         var queryData = [newProduct.category_id, newProduct.company, newProduct.name, newProduct.image, newProduct.description, newProduct.weight, newProduct.sku];
@@ -55,5 +39,8 @@ exports.ApiCreateProduct = async (req, res, next) => {
             responseLogs_1.responseLogger.print("Error Create Product...", req, res);
             return next(messages_1.ApiError.errInDatabase(error));
         }
-    });
+    }
+    catch (error) {
+        return next(messages_1.ApiError.errCopyImageFailed({ "details": "Image copy failed", error }));
+    }
 };
