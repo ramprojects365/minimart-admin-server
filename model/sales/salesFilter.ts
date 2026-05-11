@@ -22,8 +22,8 @@ export class SalesGetFilters {
             this.from ? "s.date > " + mySqlPool.escape(this.from) : true,
             this.to ? "s.date <= " + mySqlPool.escape(this.to) : true,
             this.exactDate ? "DATE(s.date) = " + mySqlPool.escape(this.exactDate) : true,
-            this.status === 'active' ? "(sstat.status !='DELIVERED' AND sstat.status !='Cancelled')" : true,
-            this.status === 'billing' ? "(sstat.status ='DELIVERED' OR sstat.status ='ORDERED')" : true,
+            this.status === 'active' ? "(LOWER(sstat.status) != 'delivered' AND LOWER(sstat.status) != 'cancelled')" : true,
+            this.status === 'billing' ? "(LOWER(sstat.status) = 'delivered' OR LOWER(sstat.status) = 'ordered')" : true,
         ].join(" AND ");
         return filterCondition;
     }

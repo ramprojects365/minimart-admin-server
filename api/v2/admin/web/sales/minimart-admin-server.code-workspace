@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../../../../../../minimart-admin-client"
+		},
+		{
+			"path": "../../../../../../payment-gateway"
 		}
 	]
 }

@@ -30,7 +30,7 @@ export const apiLoginUser: CustomRquestHandler = async (req, res, next) => {
         responseLogger.print("User Found ......", req, res);
         if (userFromDB != undefined) {
             // Check if user is active or not
-            if (userFromDB.status == 'active') {
+            if (String(userFromDB.status).toLowerCase() == 'active') {
                 bcrypt.compare(user.password, userFromDB.password, (err, resp) => {
                     if (resp == true) {
                         // passwords match
@@ -79,7 +79,7 @@ export const tokenLoginUser: CustomRquestHandler = async (req, res, next) => {
         responseLogger.print("User Found ......", req, res);
         if (userFromDB != undefined) {
             // Check if user is active or not
-            if (userFromDB.status == 'active') {
+            if (String(userFromDB.status).toLowerCase() == 'active') {
                 bcrypt.compare(user.password, userFromDB.password, (err, resp) => {
                     if (resp == true) {
                         // passwords match

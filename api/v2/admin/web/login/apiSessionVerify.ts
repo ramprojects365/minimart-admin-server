@@ -17,7 +17,7 @@ export const apiSessionVerify: CustomRquestHandler = (req, res, next) => {
             } else {
                 // TODO Check if Token has expired.
                 const adminUserId = decoded.userID;
-                var sqlQuery = "SELECT id, status, user_type, shop_id, branch_id, displayName, email, password FROM adminusers WHERE id = ? AND status = 'active'";
+                var sqlQuery = "SELECT id, status, user_type, shop_id, branch_id, displayName, email, password FROM adminusers WHERE id = ? AND LOWER(status) = 'active'";
                 var queryData = [adminUserId];
                 try {
                     const result = await executeQuery(sqlQuery, queryData);

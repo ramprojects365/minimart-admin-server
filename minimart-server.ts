@@ -12,6 +12,7 @@ const clientIndexPath = path.join(clientPath, "index.html");
 
 //diable header information about server type - Express
 app.disable("x-powered-by");
+app.disable("etag");
 
 //------- TO BE REMOVED IN FUTURE
 app.get("/", function (_request, response) {
@@ -25,6 +26,8 @@ app.use("/", express.static(clientPath));
 //-------
 app.use("/public", express.static(path.resolve("./", "public")));
 app.use("/api/v2", (_request, response, next) => {
+    delete _request.headers["if-none-match"];
+    delete _request.headers["if-modified-since"];
     response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
     response.setHeader("Pragma", "no-cache");
     response.setHeader("Expires", "0");

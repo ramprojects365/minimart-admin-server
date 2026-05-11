@@ -34,7 +34,7 @@ exports.apiLoginUser = async (req, res, next) => {
         responseLogs_1.responseLogger.print("User Found ......", req, res);
         if (userFromDB != undefined) {
             // Check if user is active or not
-            if (userFromDB.status == 'active') {
+            if (String(userFromDB.status).toLowerCase() == 'active') {
                 bcrypt.compare(user.password, userFromDB.password, (err, resp) => {
                     if (resp == true) {
                         // passwords match
@@ -86,7 +86,7 @@ exports.tokenLoginUser = async (req, res, next) => {
         responseLogs_1.responseLogger.print("User Found ......", req, res);
         if (userFromDB != undefined) {
             // Check if user is active or not
-            if (userFromDB.status == 'active') {
+            if (String(userFromDB.status).toLowerCase() == 'active') {
                 bcrypt.compare(user.password, userFromDB.password, (err, resp) => {
                     if (resp == true) {
                         // passwords match

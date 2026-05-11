@@ -35,9 +35,9 @@ export class UserUpdateFilters {
             (this.user_type && this.user_type == 'manager') ? "user_type = 'manager'" : "",
             (this.user_type && this.user_type == 'employee') ? "user_type = 'employee'" : "",
             (this.plain_pass && this.plain_pass != "" ? "password = '" + this.hash + "'" : ""),
-            this.status ? "status = " + mySqlPool.escape(this.status) : "",
+            this.status ? "LOWER(status) = LOWER(" + mySqlPool.escape(this.status) + ")" : "",
         ];
         return filterCondition.filter(Boolean).join(" , ");
     }
 }
-*/ 
+*/

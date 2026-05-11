@@ -15,6 +15,7 @@ const clientPath = path_1.default.resolve(__dirname, "client");
 const clientIndexPath = path_1.default.join(clientPath, "index.html");
 //diable header information about server type - Express
 app.disable("x-powered-by");
+app.disable("etag");
 //------- TO BE REMOVED IN FUTURE
 app.get("/", function (_request, response) {
     response.json({ status: "ok", service: "minimart-admin-server" });
@@ -27,6 +28,8 @@ app.use("/", express_1.default.static(clientPath));
 //-------
 app.use("/public", express_1.default.static(path_1.default.resolve("./", "public")));
 app.use("/api/v2", (_request, response, next) => {
+    delete _request.headers["if-none-match"];
+    delete _request.headers["if-modified-since"];
     response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
     response.setHeader("Pragma", "no-cache");
     response.setHeader("Expires", "0");

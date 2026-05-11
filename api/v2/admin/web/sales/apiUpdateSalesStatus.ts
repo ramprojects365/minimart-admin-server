@@ -9,10 +9,16 @@ import { SaleStatus } from "../../../../../model/sales/saleStatus";
 export const ApiUpdateSalesStatus: RequestHandler = async (req, res, next) => {
     responseLogger.print("Calling Update Sales Status...", req, res);
     const sales_id = req.params.sales_id;
-    const status = req.body.status;
+    const statusMap: any = {
+        accepted: "Accepted",
+        delivered: "Delivered",
+        cancelled: "Cancelled",
+        delivering: "Delivering"
+    };
+    const status = statusMap[String(req.body.status || "").toLowerCase()];
     console.log(status);
 
-    if (status == "Accepted" || status == "Delivered" || status == "Cancelled" || status == 'Delivering') {
+    if (status) {
         // newStatus = "Accepted";
         // Continue...
     } else {

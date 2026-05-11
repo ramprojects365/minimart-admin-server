@@ -8,7 +8,13 @@ export const ApiDeleteSalesStatus: RequestHandler = async (req, res, next) => {
     responseLogger.print("Calling Delete Sales Status...", req, res);
     const sales_id = req.params.sales_id;
     const status_id = req.params.status_id;
-    const status = req.params.status;
+    const statusMap: any = {
+        accepted: "Accepted",
+        delivered: "Delivered",
+        cancelled: "Cancelled",
+        delivering: "Delivering"
+    };
+    const status = statusMap[String(req.params.status || "").toLowerCase()];
     let newStatus = '';
     if (status == "Delivered" || status == "Cancelled" || status == 'Delivering') {
         newStatus = "Accepted";
@@ -17,7 +23,7 @@ export const ApiDeleteSalesStatus: RequestHandler = async (req, res, next) => {
     } else {
         return next(ApiError.errMissingBody({ "details": "Required Fields are : Proper Status" }));
     }
-    var sqlQuery = "DELETE FROM sales_status WHERE status_id = ? AND sales_id = ? AND status = ?; UPDATE sales SET sales_status = ? WHERE sales_id = ?;";
+    var sqlQuery = "DELETE FROM sales_status WHERE status_id = ? AND sales_id = ? AND LOWER(status) = LOWER(?); UPDATE sales SET sales_status = ? WHERE sales_id = ?;";
     var queryData = [status_id, sales_id, status, newStatus, sales_id];
     try {
         const rows = await executeQuery(sqlQuery, queryData);

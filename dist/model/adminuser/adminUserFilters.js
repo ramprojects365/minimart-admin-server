@@ -34,7 +34,7 @@ class UserUpdateFilters {
             (this.user_type && this.user_type == 'employee') ? "user_type = 'employee'" : "",
             (this.user_type && this.user_type == 'padmin') ? "user_type = 'padmin', shop_id = 0, branch_id = 0" : "",
             (this.plain_pass && this.plain_pass != "" ? "password = '" + this.hash + "'" : ""),
-            this.status ? "status = " + db_1.mySqlPool.escape(this.status) : "",
+            this.status ? "LOWER(status) = LOWER(" + db_1.mySqlPool.escape(this.status) + ")" : "",
         ];
         return filterCondition.filter(Boolean).join(" , ");
     }
