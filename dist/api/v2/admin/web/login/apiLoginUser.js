@@ -26,7 +26,7 @@ exports.apiLoginUser = async (req, res, next) => {
         email: req.body.email || "",
         password: req.body.password || ""
     };
-    var sqlQuery = "SELECT id, status, user_type, displayName, email, password FROM adminusers WHERE email = ?";
+    var sqlQuery = "SELECT id, status, user_type, shop_id, branch_id, displayName, email, password FROM adminusers WHERE email = ?";
     var queryData = [user.email];
     try {
         const result = await db_1.executeQuery(sqlQuery, queryData);
@@ -78,7 +78,7 @@ exports.tokenLoginUser = async (req, res, next) => {
         email: req.body.username || "",
         password: req.body.password || ""
     };
-    var sqlQuery = "SELECT id, status, user_type, displayName, email, password FROM adminusers WHERE email = ?";
+    var sqlQuery = "SELECT id, status, user_type, shop_id, branch_id, displayName, email, password FROM adminusers WHERE email = ?";
     var queryData = [user.email];
     try {
         const result = await db_1.executeQuery(sqlQuery, queryData);

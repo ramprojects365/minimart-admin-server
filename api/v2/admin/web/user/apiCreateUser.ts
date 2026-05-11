@@ -28,9 +28,12 @@ export const apiCreateUser: RequestHandler = async (req, res, next) => {
         email: req.body.email || "",
         password: req.body.password || "",
     };
+    const scopedUserTypes = ["manager", "employee", "api"];
     // Check if data is not empty
     if (newUser.user_type == "" || newUser.displayName == "" || newUser.email == "" || newUser.password == "") {
         return next(ApiError.errMissingBody({ "details": "Required Fields are : " + requiredFields }));
+    } else if (scopedUserTypes.includes(newUser.user_type) && (!newUser.shop_id || !newUser.branch_id)) {
+        return next(ApiError.errMissingBody({ "details": "Required Fields for " + newUser.user_type + " are : shop_id, branch_id" }));
     } else if (newUser.user_type === 'sadmin') {
         sqlQuery = "INSERT INTO adminusers (user_type, displayName, email, password) VALUES ('sadmin', ?, ?, ?);";
         queryData = [newUser.displayName, newUser.email];
@@ -44,7 +47,7 @@ export const apiCreateUser: RequestHandler = async (req, res, next) => {
         sqlQuery = "INSERT INTO adminusers (user_type, shop_id, branch_id, displayName, email, password) VALUES ('employee', ?, ?, ?, ?, ?);";
         queryData = [newUser.shop_id, newUser.branch_id, newUser.displayName, newUser.email];
     } else if (newUser.user_type === 'api') {
-        sqlQuery = "INSERT INTO adminusers (user_type, shop_id, branch_id, displayName, email, password) VALUES ('employee', ?, ?, ?, ?, ?);";
+        sqlQuery = "INSERT INTO adminusers (user_type, shop_id, branch_id, displayName, email, password) VALUES ('api', ?, ?, ?, ?, ?);";
         queryData = [newUser.shop_id, newUser.branch_id, newUser.displayName, newUser.email];
     }else if (newUser.user_type === 'padmin') {
         sqlQuery = "INSERT INTO adminusers (user_type, displayName, email, password) VALUES ('padmin', ?, ?, ?);";
