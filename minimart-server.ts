@@ -24,6 +24,13 @@ app.use("/", express.static(clientPath));
 // app.use("/product_images", express.static(path.resolve("./", "public", "product_images")));
 //-------
 app.use("/public", express.static(path.resolve("./", "public")));
+app.use("/api/v2", (_request, response, next) => {
+    response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    response.setHeader("Pragma", "no-cache");
+    response.setHeader("Expires", "0");
+    response.setHeader("Surrogate-Control", "no-store");
+    next();
+});
 app.all('/*', function (request, response, next) {
     // Just send the index.html for other files to support HTML5Mode
     // console.log(request.url);

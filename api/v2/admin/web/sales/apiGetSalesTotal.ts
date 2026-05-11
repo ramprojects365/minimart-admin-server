@@ -11,7 +11,7 @@ export const ApiGetSalesTotal: RequestHandler = async (req, res, next) => {
     var pendingAmountQuery = "";
     const currentUser = (req as any).user;
     const query = { ...req.query };
-    if (currentUser && currentUser.user_type !== "sadmin" && currentUser.user_type !== "padmin" && !query.user_id && !query.branch_id) {
+    if (currentUser && currentUser.user_type !== "sadmin" && currentUser.user_type !== "padmin") {
         query.user_id = currentUser.id;
     }
     if (query.user_id == undefined && query.branch_id == undefined) {
