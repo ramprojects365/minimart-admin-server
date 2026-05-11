@@ -7,7 +7,12 @@ const shopFilters_1 = require("../../../../../model/shop/shopFilters");
 const responseLogs_1 = require("../../../general/responseLogs");
 exports.apiGetShops = async (req, res, next) => {
     responseLogs_1.responseLogger.print("Calling Get Shops...", req, res);
-    const filters = new shopFilters_1.ShopGetFilters(req.query);
+    const currentUser = req.user;
+    const query = Object.assign({}, req.query);
+    if (currentUser && currentUser.user_type !== "sadmin" && currentUser.user_type !== "padmin" && !query.user_id && !query.shop_id) {
+        query.user_id = currentUser.id;
+    }
+    const filters = new shopFilters_1.ShopGetFilters(query);
     // var sqlQuery = 'SELECT * FROM shops WHERE ' + filters.getCondition();
     var sqlQuery = 'SELECT s.shop_id, s.user_id, s.shop_name, s.shop_addr FROM shops as s INNER JOIN adminusers as a ON (s.user_id = a.id OR s.shop_id = a.shop_id) WHERE ' + filters.getCondition() + ' group by s.shop_id, s.user_id, s.shop_name, s.shop_addr;';
     try {

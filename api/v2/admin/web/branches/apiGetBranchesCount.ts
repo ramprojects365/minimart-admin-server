@@ -6,8 +6,10 @@ import { PublicInfo, ApiError } from "../../../../../model/shared/messages";
 
 export const ApiGetBranchesCount: RequestHandler = async (req, res, next) => {
     responseLogger.print("Calling Get Branches Count...", req, res);
-    if (req.query.user_id) {
-        var sqlQuery = 'SELECT count(s.shop_name) AS branch_count FROM shops AS s INNER JOIN branches AS b ON s.shop_id = b.shop_id INNER JOIN adminusers AS a ON (s.user_id = a.id OR s.shop_id = a.shop_id) WHERE a.id = ' + mySqlPool.escape(req.query.user_id);
+    const currentUser = (req as any).user;
+    const userId = req.query.user_id || (currentUser && currentUser.user_type !== "sadmin" && currentUser.user_type !== "padmin" ? currentUser.id : undefined);
+    if (userId) {
+        var sqlQuery = 'SELECT count(s.shop_name) AS branch_count FROM shops AS s INNER JOIN branches AS b ON s.shop_id = b.shop_id INNER JOIN adminusers AS a ON (s.user_id = a.id OR s.shop_id = a.shop_id) WHERE a.id = ' + mySqlPool.escape(userId);
     } else {
         var sqlQuery = 'SELECT count(branch_id) as branch_count FROM branches';
     }

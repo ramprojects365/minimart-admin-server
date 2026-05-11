@@ -7,7 +7,12 @@ import { ShopGetCountFilters } from "../../../../../model/shop/shopCountFilters"
 
 export const ApiGetShopsCount: RequestHandler = async (req, res, next) => {
     responseLogger.print("Calling Get Shops Count...", req, res);
-    const filters = new ShopGetCountFilters(req.query);
+    const currentUser = (req as any).user;
+    const query = { ...req.query };
+    if (currentUser && currentUser.user_type !== "sadmin" && currentUser.user_type !== "padmin" && !query.user_id) {
+        query.user_id = currentUser.id;
+    }
+    const filters = new ShopGetCountFilters(query);
     var sqlQuery = 'SELECT count(s.shop_id) as shops_count FROM shops AS s INNER JOIN adminusers AS a ON (s.user_id = a.id OR s.shop_id = a.shop_id) WHERE ' + filters.getCondition();
     try {
         const shopsCount = await executeQuery(sqlQuery);

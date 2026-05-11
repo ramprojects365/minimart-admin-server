@@ -10,10 +10,23 @@ import { fileMapper } from "../../../general/static";
 
 export const ApiGetBranches: RequestHandler = async (req, res, next) => {
     responseLogger.print("Calling Get Branches...", req, res);
-    const filters = new BranchGetFilters(req.query);
-    var sqlQuery = 'SELECT * FROM branches WHERE ' + filters.getCondition();
+    const currentUser = (req as any).user;
+    const query = { ...req.query };
+    const queryData: any[] = [];
+    var sqlQuery = "";
+    if (currentUser && currentUser.user_type !== "sadmin" && currentUser.user_type !== "padmin" && !query.shop_id) {
+        if (!currentUser.branch_id) {
+            res.json(PublicInfo.infoSendData({ branches: [] }));
+            return;
+        }
+        sqlQuery = "SELECT * FROM branches WHERE branch_id = ?";
+        queryData.push(currentUser.branch_id);
+    } else {
+        const filters = new BranchGetFilters(query);
+        sqlQuery = 'SELECT * FROM branches WHERE ' + filters.getCondition();
+    }
     try {
-        const branches: dbModel.branches[] = await executeQuery(sqlQuery);
+        const branches: dbModel.branches[] = await executeQuery(sqlQuery, queryData);
         responseLogger.print("Completed Get Branches...", req, res);
         // To change image to full image path
         branches.map(item => item.image = fileMapper(req.app.get("env"), item.image, 'shop_images').toString());

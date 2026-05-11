@@ -5,8 +5,10 @@ const db_1 = require("../../../../../db/db");
 const messages_1 = require("../../../../../model/shared/messages");
 exports.ApiGetBranchesCount = async (req, res, next) => {
     responseLogs_1.responseLogger.print("Calling Get Branches Count...", req, res);
-    if (req.query.user_id) {
-        var sqlQuery = 'SELECT count(s.shop_name) AS branch_count FROM shops AS s INNER JOIN branches AS b ON s.shop_id = b.shop_id INNER JOIN adminusers AS a ON (s.user_id = a.id OR s.shop_id = a.shop_id) WHERE a.id = ' + db_1.mySqlPool.escape(req.query.user_id);
+    const currentUser = req.user;
+    const userId = req.query.user_id || (currentUser && currentUser.user_type !== "sadmin" && currentUser.user_type !== "padmin" ? currentUser.id : undefined);
+    if (userId) {
+        var sqlQuery = 'SELECT count(s.shop_name) AS branch_count FROM shops AS s INNER JOIN branches AS b ON s.shop_id = b.shop_id INNER JOIN adminusers AS a ON (s.user_id = a.id OR s.shop_id = a.shop_id) WHERE a.id = ' + db_1.mySqlPool.escape(userId);
     }
     else {
         var sqlQuery = 'SELECT count(branch_id) as branch_count FROM branches';
