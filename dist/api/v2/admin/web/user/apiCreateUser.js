@@ -17,6 +17,8 @@ exports.apiCreateUser = async (req, res, next) => {
     responseLogs_1.responseLogger.print("Calling Create User...", req, res);
     var sqlQuery = '';
     var queryData;
+    const scopedUserTypes = ["manager", "employee", "api"];
+    const isScopedUser = scopedUserTypes.includes(req.body.user_type);
     // Check if all required fields are there
     const requiredFields = ["user_type", "displayName", "email", "password"];
     const givenFields = Object.getOwnPropertyNames(req.body);
@@ -27,13 +29,12 @@ exports.apiCreateUser = async (req, res, next) => {
         id: 0,
         status: 'active',
         user_type: req.body.user_type || "",
-        shop_id: req.body.shop_id || "",
-        branch_id: req.body.branch_id || "",
+        shop_id: isScopedUser ? req.body.shop_id || "" : "",
+        branch_id: isScopedUser ? req.body.branch_id || "" : "",
         displayName: req.body.displayName || "",
         email: req.body.email || "",
         password: req.body.password || "",
     };
-    const scopedUserTypes = ["manager", "employee", "api"];
     // Check if data is not empty
     if (newUser.user_type == "" || newUser.displayName == "" || newUser.email == "" || newUser.password == "") {
         return next(messages_1.ApiError.errMissingBody({ "details": "Required Fields are : " + requiredFields }));

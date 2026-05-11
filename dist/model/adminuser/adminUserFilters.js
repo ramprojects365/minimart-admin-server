@@ -28,10 +28,11 @@ class UserUpdateFilters {
     getCondition() {
         const filterCondition = [
             this.display_name ? "displayName = " + db_1.mySqlPool.escape(this.display_name) : "",
-            (this.user_type && this.user_type == 'sadmin') ? "user_type = 'sadmin'" : "",
-            (this.user_type && this.user_type == 'nadmin') ? "user_type = 'nadmin'" : "",
+            (this.user_type && this.user_type == 'sadmin') ? "user_type = 'sadmin', shop_id = 0, branch_id = 0" : "",
+            (this.user_type && this.user_type == 'nadmin') ? "user_type = 'nadmin', shop_id = 0, branch_id = 0" : "",
             (this.user_type && this.user_type == 'manager') ? "user_type = 'manager'" : "",
             (this.user_type && this.user_type == 'employee') ? "user_type = 'employee'" : "",
+            (this.user_type && this.user_type == 'padmin') ? "user_type = 'padmin', shop_id = 0, branch_id = 0" : "",
             (this.plain_pass && this.plain_pass != "" ? "password = '" + this.hash + "'" : ""),
             this.status ? "status = " + db_1.mySqlPool.escape(this.status) : "",
         ];
