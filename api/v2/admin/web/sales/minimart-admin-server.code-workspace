@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "../../../../../../payment-gateway"
+		},
+		{
+			"path": "../../../../../../minimart-mobile-server"
 		}
 	]
 }

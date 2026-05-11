@@ -12,7 +12,11 @@ exports.ApiCreateProduct = async (req, res, next) => {
     if (!requiredFields.every(field => givenFields.includes(field))) {
         return next(messages_1.ApiError.errMissingBody({ "details": "Required Fields are : " + requiredFields }));
     }
+    if (typeof req.body.image !== "string" || !req.body.image) {
+        return next(messages_1.ApiError.errMissingBody({ "details": "Required Fields are : valid image" }));
+    }
     const image = req.body.image.slice(req.body.image.lastIndexOf("/") + 1, req.body.image.length);
+    const sku = typeof req.body.sku === "string" ? req.body.sku.trim() : req.body.sku;
     // console.log("IMMAGEEEEEEEEE " + req.body.image.slice(req.body.image.lastIndexOf("/") + 1, req.body.image.length))
     const newProduct = {
         product_id: 0,
@@ -22,7 +26,7 @@ exports.ApiCreateProduct = async (req, res, next) => {
         image: image || "",
         description: req.body.description || "",
         weight: req.body.weight || 0.00,
-        sku: req.body.sku || null,
+        sku: sku || null,
     };
     try {
         await static_1.moveImageFromCache(image, "product_images");
@@ -37,6 +41,9 @@ exports.ApiCreateProduct = async (req, res, next) => {
         }
         catch (error) {
             responseLogs_1.responseLogger.print("Error Create Product...", req, res);
+            if (error.toString().indexOf("Duplicate") !== -1 || error.code === "ER_DUP_ENTRY") {
+                return next(messages_1.ApiError.errInDatabaseDuplicate(error));
+            }
             return next(messages_1.ApiError.errInDatabase(error));
         }
     }

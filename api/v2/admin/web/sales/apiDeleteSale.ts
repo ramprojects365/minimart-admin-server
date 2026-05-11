@@ -7,14 +7,16 @@ import { PublicInfo, ApiError } from "../../../../../model/shared/messages";
 export const ApiDeleteSale: RequestHandler = async (req, res, next) => {
     responseLogger.print("Calling Delete Sale...", req, res);
     const salesID = req.params.sales_id;
-    var sqlQuery = "UPDATE sales SET sales_status = 'Cancelled' WHERE sales_id = ?; INSERT INTO sales_status(sales_id,status) VALUES(?, 'Cancelled') ON DUPLICATE KEY UPDATE status = VALUES(status);";
-    var queryData = [salesID, salesID];
     try {
-        const rows = await executeQuery(sqlQuery, queryData);
+        const rows = await executeQuery("UPDATE sales SET sales_status = 'Cancelled' WHERE sales_id = ?", [salesID]);
         if (rows.affectedRows == 0) {
             responseLogger.print("Completed Delete Sale But no row updated...", req, res);
             res.json(PublicInfo.infoUpdated({ info: "No Rows Deleted." }));
         } else {
+            await executeQuery(
+                "INSERT INTO sales_status(sales_id, status) VALUES(?, 'Cancelled') ON DUPLICATE KEY UPDATE status = VALUES(status)",
+                [salesID]
+            );
             responseLogger.print("Completed Delete Sale...", req, res);
             res.json(PublicInfo.infoDeleted({ deleted_id: salesID }));
         }

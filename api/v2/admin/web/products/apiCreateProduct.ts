@@ -14,7 +14,11 @@ export const ApiCreateProduct: RequestHandler = async (req, res, next) => {
     if (!requiredFields.every(field => givenFields.includes(field))) {
         return next(ApiError.errMissingBody({ "details": "Required Fields are : " + requiredFields }));
     }
+    if (typeof req.body.image !== "string" || !req.body.image) {
+        return next(ApiError.errMissingBody({ "details": "Required Fields are : valid image" }));
+    }
     const image = req.body.image.slice(req.body.image.lastIndexOf("/") + 1, req.body.image.length);
+    const sku = typeof req.body.sku === "string" ? req.body.sku.trim() : req.body.sku;
     // console.log("IMMAGEEEEEEEEE " + req.body.image.slice(req.body.image.lastIndexOf("/") + 1, req.body.image.length))
     const newProduct: dbModel.product = {
         product_id: 0,
@@ -24,7 +28,7 @@ export const ApiCreateProduct: RequestHandler = async (req, res, next) => {
         image: image || "",
         description: req.body.description || "",
         weight: req.body.weight || 0.00,
-        sku: req.body.sku || null,
+        sku: sku || null,
     };
     try {
         await moveImageFromCache(image, "product_images");
@@ -38,6 +42,9 @@ export const ApiCreateProduct: RequestHandler = async (req, res, next) => {
             res.json(PublicInfo.infoCreated({ product: new ProductSummary(newProduct) }));
         } catch (error) {
             responseLogger.print("Error Create Product...", req, res);
+            if (error.toString().indexOf("Duplicate") !== -1 || error.code === "ER_DUP_ENTRY") {
+                return next(ApiError.errInDatabaseDuplicate(error));
+            }
             return next(ApiError.errInDatabase(error));
         }
     } catch (error) {
