@@ -62,13 +62,12 @@ export const apiCreateUser: RequestHandler = async (req, res, next) => {
             newUser.id = rows.insertId;
             responseLogger.print("Completed Create User...", req, res);
             res.json(PublicInfo.infoCreated({ admin_user: new AdminUserSummary(newUser) }));
-        // } catch (error: any) {
         } catch (error) {
+            const dbError = error as any;
             responseLogger.print("Error Create User...", req, res);
-            // console.log(error.code);
-            // if (error.code === 'ER_DUP_ENTRY') {
-            //     return next(ApiError.errInDatabaseDuplicate(error));
-            // }
+            if (dbError.code === 'ER_DUP_ENTRY') {
+                return next(ApiError.errInDatabaseDuplicate(error));
+            }
             return next(ApiError.errInDatabase(error));
         }
     })

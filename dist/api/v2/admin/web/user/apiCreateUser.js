@@ -75,14 +75,13 @@ exports.apiCreateUser = async (req, res, next) => {
             newUser.id = rows.insertId;
             responseLogs_1.responseLogger.print("Completed Create User...", req, res);
             res.json(messages_1.PublicInfo.infoCreated({ admin_user: new adminUserSummary_1.AdminUserSummary(newUser) }));
-            // } catch (error: any) {
         }
         catch (error) {
+            const dbError = error;
             responseLogs_1.responseLogger.print("Error Create User...", req, res);
-            // console.log(error.code);
-            // if (error.code === 'ER_DUP_ENTRY') {
-            //     return next(ApiError.errInDatabaseDuplicate(error));
-            // }
+            if (dbError.code === 'ER_DUP_ENTRY') {
+                return next(messages_1.ApiError.errInDatabaseDuplicate(error));
+            }
             return next(messages_1.ApiError.errInDatabase(error));
         }
     });
