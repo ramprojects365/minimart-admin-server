@@ -13,12 +13,14 @@ exports.ApiGetBranches = async (req, res, next) => {
     const queryData = [];
     var sqlQuery = "";
     if (currentUser && currentUser.user_type !== "sadmin" && currentUser.user_type !== "padmin" && !query.shop_id) {
-        if (!currentUser.branch_id) {
-            res.json(messages_1.PublicInfo.infoSendData({ branches: [] }));
-            return;
+        if (currentUser.branch_id) {
+            sqlQuery = "SELECT * FROM branches WHERE branch_id = ?";
+            queryData.push(currentUser.branch_id);
         }
-        sqlQuery = "SELECT * FROM branches WHERE branch_id = ?";
-        queryData.push(currentUser.branch_id);
+        else {
+            sqlQuery = "SELECT b.* FROM branches AS b INNER JOIN shops AS s ON b.shop_id = s.shop_id WHERE s.user_id = ?";
+            queryData.push(currentUser.id);
+        }
     }
     else {
         const filters = new branchFilters_1.BranchGetFilters(query);
