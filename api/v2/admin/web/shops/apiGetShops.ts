@@ -12,11 +12,17 @@ export const apiGetShops: RequestHandler = async (req, res, next) => {
     const currentUser = (req as any).user;
     const query = { ...req.query };
     if (currentUser && currentUser.user_type !== "sadmin" && currentUser.user_type !== "padmin" && !query.user_id && !query.shop_id) {
-        query.user_id = currentUser.id;
+        if (currentUser.branch_id) {
+            query.branch_id = currentUser.branch_id;
+        } else if (currentUser.shop_id) {
+            query.shop_id = currentUser.shop_id;
+        } else {
+            query.user_id = currentUser.id;
+        }
     }
     const filters = new ShopGetFilters(query);
     // var sqlQuery = 'SELECT * FROM shops WHERE ' + filters.getCondition();
-    var sqlQuery = 'SELECT s.shop_id, s.user_id, s.shop_name, s.shop_addr FROM shops as s INNER JOIN adminusers as a ON (s.user_id = a.id OR s.shop_id = a.shop_id) WHERE ' + filters.getCondition() + ' group by s.shop_id, s.user_id, s.shop_name, s.shop_addr;';
+    var sqlQuery = 'SELECT s.shop_id, s.user_id, s.shop_name, s.shop_addr FROM shops as s LEFT JOIN branches as b ON s.shop_id = b.shop_id LEFT JOIN adminusers as a ON (s.user_id = a.id OR s.shop_id = a.shop_id OR b.branch_id = a.branch_id) WHERE ' + filters.getCondition() + ' group by s.shop_id, s.user_id, s.shop_name, s.shop_addr;';
     try {
         const shops: dbModel.shops[] = await executeQuery(sqlQuery);
         responseLogger.print("Completed Get Shops...", req, res);

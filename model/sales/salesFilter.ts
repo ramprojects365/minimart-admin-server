@@ -16,14 +16,15 @@ export class SalesGetFilters {
         this.exactDate = data.exact_date;
     }
     getCondition() {
+        const currentStatus = "LOWER(COALESCE(sstat.status, s.sales_status, 'Ordered'))";
         const filterCondition = [
             this.branch_id ? "s.branch_id = " + mySqlPool.escape(this.branch_id) : true,
             this.sales_id ? "s.sales_id = " + mySqlPool.escape(this.sales_id) : true,
             this.from ? "s.date > " + mySqlPool.escape(this.from) : true,
             this.to ? "s.date <= " + mySqlPool.escape(this.to) : true,
             this.exactDate ? "DATE(s.date) = " + mySqlPool.escape(this.exactDate) : true,
-            this.status === 'active' ? "(LOWER(sstat.status) != 'delivered' AND LOWER(sstat.status) != 'cancelled')" : true,
-            this.status === 'billing' ? "(LOWER(sstat.status) = 'delivered' OR LOWER(sstat.status) = 'ordered')" : true,
+            this.status === 'active' ? "(" + currentStatus + " != 'delivered' AND " + currentStatus + " != 'cancelled')" : true,
+            this.status === 'billing' ? "(" + currentStatus + " = 'delivered' OR " + currentStatus + " = 'ordered')" : true,
         ].join(" AND ");
         return filterCondition;
     }
