@@ -8,11 +8,24 @@ import { fileMapper } from "../../../general/static";
 
 export const apiGetShopsAndBranches: RequestHandler = async (req, res, next) => {
     responseLogger.print("Calling Get Shops and Branches...", req, res);
-    // const filters = new deliveryvendorsListFilters(req.query);
-    // var sqlQuery = 'SELECT * FROM shops WHERE ' + filters.getCondition();
-    var sqlQuery = 'SELECT s.shop_id, b.branch_id, s.shop_name, b.branch_name, b.image, b.currency, b.isPosEnabled, b.active FROM shops AS s INNER JOIN branches AS b WHERE s.shop_id = b.shop_id;';
+    const currentUser = (req as any).user;
+    const queryData: any[] = [];
+    var sqlQuery = 'SELECT s.shop_id, b.branch_id, s.shop_name, b.branch_name, b.image, b.currency, b.isPosEnabled, b.active FROM shops AS s INNER JOIN branches AS b ON s.shop_id = b.shop_id';
+    if (currentUser && currentUser.user_type !== "sadmin" && currentUser.user_type !== "padmin") {
+        if (currentUser.branch_id) {
+            sqlQuery += " WHERE b.branch_id = ?";
+            queryData.push(currentUser.branch_id);
+        } else if (currentUser.shop_id) {
+            sqlQuery += " WHERE s.shop_id = ?";
+            queryData.push(currentUser.shop_id);
+        } else {
+            sqlQuery += " WHERE s.user_id = ?";
+            queryData.push(currentUser.id);
+        }
+    }
+    sqlQuery += ";";
     try {
-        const services: dbModel.ShopAndBranches[] = await executeQuery(sqlQuery);
+        const services: dbModel.ShopAndBranches[] = await executeQuery(sqlQuery, queryData);
         responseLogger.print("Completed Get Shops and Branches...", req, res);
         // To change image to full image path
         services.map(item => item.image = fileMapper(req.app.get("env"), item.image, 'shop_images').toString());
